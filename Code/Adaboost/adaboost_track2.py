@@ -2,9 +2,9 @@ from sklearn.ensemble import AdaBoostClassifier
 from sklearn.tree import DecisionTreeClassifier
 import numpy as np
 
-data=np.genfromtxt('sample_train_x.csv',dtype='int',delimiter=',')
+data=np.genfromtxt('../../ML_final_project/sample_train_x.csv',dtype='int',delimiter=',')
 train=data[1:,:]#the first row is string
-y=np.genfromtxt('truth_train.csv',dtype='int',delimiter=',')[:,1]
+y=np.genfromtxt('../../ML_final_project/truth_train.csv',dtype='int',delimiter=',')[:,1]
 
 bdt = AdaBoostClassifier(DecisionTreeClassifier(max_depth=10),
                          algorithm="SAMME",
@@ -16,8 +16,8 @@ data=np.genfromtxt('sample_test_x.csv',dtype='int',delimiter=',')
 test=data[1:,:]#the first row is string
 y_eval=bdt.predict(test)
 
-INPUT_FILE 	= "ML_final_project/enrollment_test.csv"
-OUTPUT_FILE = "Output/adaboost_tree_track2.csv"
+INPUT_FILE 	= "../../ML_final_project/enrollment_test.csv"
+OUTPUT_FILE = "../../Output/adaboost_tree_track2.csv"
 
 outFile = open(OUTPUT_FILE, 'w')
 

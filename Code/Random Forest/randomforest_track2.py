@@ -2,9 +2,9 @@ from sklearn.ensemble import RandomForestClassifier
 import numpy as np
 import matplotlib.pyplot as plt
 
-data=np.genfromtxt('ML_final_project/sample_train_x.csv',dtype='int',delimiter=',')
+data=np.genfromtxt('../../ML_final_project/sample_train_x.csv',dtype='int',delimiter=',')
 train=data[1:,1:]#the first row is string,the first column is ID
-y=np.genfromtxt('ML_final_project/truth_train.csv',dtype='int',delimiter=',')[:,1]
+y=np.genfromtxt('../../ML_final_project/truth_train.csv',dtype='int',delimiter=',')[:,1]
 
 #the parameters needing to be determined
 max_depth=[10,20,30,40,None]

@@ -20,14 +20,14 @@ def main():
     C_CONST = 1.1
     GAMMA   = 10
 
-    INPUT_FILE   = "ML_final_project/enrollment_test.csv"
-    OUTPUT_FILE  = "output/svm_test_track2_C_" + str(C_CONST) + "_Gamma_" + str(GAMMA) + ".csv"
-    TRAIN_FILE_X = "ML_final_project/sample_train_x.csv"
-    TRAIN_FILE_Y = "ML_final_project/truth_train.csv"
+    INPUT_FILE   = "../../ML_final_project/enrollment_test.csv"
+    OUTPUT_FILE  = "../../Output/svm_test_track2_C_" + str(C_CONST) + "_Gamma_" + str(GAMMA) + ".csv"
+    TRAIN_FILE_X = "../../ML_final_project/sample_train_x.csv"
+    TRAIN_FILE_Y = "../../ML_final_project/truth_train.csv"
     TRAIN_DATA_X = np.loadtxt(TRAIN_FILE_X, delimiter=',', skiprows=1, usecols=range(1, 18))
     TRAIN_DATA_Y = np.loadtxt(TRAIN_FILE_Y, delimiter=',')
 
-    TEST_FILE_X  = "ML_final_project/sample_test_x.csv"
+    TEST_FILE_X  = "../../ML_final_project/sample_test_x.csv"
     TEST_DATA_X  = np.loadtxt(TEST_FILE_X, delimiter=',', skiprows=1, usecols=range(1, 18))
 
     t0 = time.time()

@@ -1,8 +1,8 @@
 import os
 import numpy as np
 
-INPUT_FILE 	= "ML_final_project/enrollment_test.csv"
-OUTPUT_FILE = "output/random_guess_track2.csv"
+INPUT_FILE 	= "../../ML_final_project/enrollment_test.csv"
+OUTPUT_FILE = "../../Output/random_guess_track2.csv"
 
 outFile = open(OUTPUT_FILE, 'w')
 
