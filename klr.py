@@ -42,8 +42,8 @@ N = train_x.shape[0]
 #dim = test_x.shape[1]
 #M = test_x.shape[0]
 
-lemda = 5
-gama = 100000
+lemda = 10000
+gama = 10000000000
 
 
 
@@ -103,7 +103,7 @@ with tf.device('/gpu:0'):
     #second_term = tf.reduce_sum(tf.square(tf.sub(y,second_term_tmp)),0)
     loss = tf.add(first_term,tf.reduce_sum(second_term,0))
     #loss = tf.add(first_term,second_term)
-    optimizer = tf.train.AdamOptimizer(0.001).minimize(loss)
+    optimizer = tf.train.AdamOptimizer(0.01).minimize(loss)
     prediction = tf.sign(tf.matmul(kernel_holder,betas))
 #test_prediction = tf.sign(tf.matmul(test_kernel_holder,betas))
 
