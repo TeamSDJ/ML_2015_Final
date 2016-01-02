@@ -15,9 +15,10 @@ import matplotlib.pyplot as plt
 
 #train_data = [[float(element) for element in line.split()] for line in trainfile]
 #test_data = [[float(element) for element in line.split()] for line in testfile]
-
+lemda = 0.5
+gama = 1000000000
 train_size = 10000
-val_size = 1000
+val_size = 10000
 data = np.matrix(np.genfromtxt('sample_train_x.txt', delimiter=',')[1:,1:])
 truth = np.matrix(np.genfromtxt('truth_train.txt', delimiter=',')[:,1:])
 
@@ -39,10 +40,6 @@ N = train_x.shape[0]
 M = val_x.shape[0]
 
 print "train_size = ",N," val size = ",M 
-
-lemda = 1000
-gama = 1000000000
-
 #target = 1+2*np.random.randint(-1,high=1,size = (N,1))
 
 
@@ -111,7 +108,7 @@ with tf.Session() as session:
     val_kernel_variable = val_kernel.eval()
 print "validation kernel complete!"
 #np.shape(test_kernel_variable)
-num_steps = 100
+num_steps = 10000
 with tf.Session() as session:
     tf.initialize_all_variables().run()
     for step in range(num_steps):
