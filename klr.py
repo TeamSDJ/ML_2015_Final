@@ -30,7 +30,7 @@ np.shape(train_x)
 np.shape(train_y)
 
 val_x = data[train_size:train_size+val_size,:]
-val_y = data[train_size:train_size+val_size,:]
+val_y = truth[train_size:train_size+val_size,:]
 
 dim = train_x.shape[1]
 N = train_x.shape[0]
@@ -111,7 +111,7 @@ with tf.Session() as session:
     val_kernel_variable = val_kernel.eval()
 print "validation kernel complete!"
 #np.shape(test_kernel_variable)
-num_steps = 10
+num_steps = 100
 with tf.Session() as session:
     tf.initialize_all_variables().run()
     for step in range(num_steps):
@@ -120,8 +120,6 @@ with tf.Session() as session:
 	    #p=prediction.eval(feed_dict={kernel_holder:kernel_variable})
             #print type(p)
 	    _,p,vp= session.run([optimizer,prediction,val_prediction], feed_dict={kernel_holder:kernel_variable,val_kernel_holder:val_kernel_variable})
-	    print vp
-	    print val_y
 	    txt = "Ein = "+str(100*np.sum(p!=train_y)/train_size) + " Eout = "+str(100*np.sum(vp!=val_y)/val_size)
             print txt
             #time.sleep(0.5)
