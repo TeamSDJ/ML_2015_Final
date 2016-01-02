@@ -109,7 +109,7 @@ with tf.device('/gpu:0'):
     #the constants of equation
     loss_array = []
     optimizer_array = []
-    #prediction_array = []
+    prediction_array = []
     val_prediction_array = []
     for i in range(6):
         loss_array.append(tfKLRLoss(y_array[i],betas_array[i],kernel_holder_array[i],lemda))
