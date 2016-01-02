@@ -59,10 +59,10 @@ with tf.device('/gpu:0'):
     #x_t = tf.constant(test_x,dtype=tf.float32)
     #XXX formatting the kernel of training data:
     x_2 = tf.mul(x,x) #(N,d)
-    xxT = tf.matmul(x,tf.transpose(x)) #(N,N)
+    xxT = tf.matmul(x,tf.transpose(x,perm=(1,0))) #(N,N)
     ones = tf.constant(np.ones((N,dim)),dtype=tf.float32) #(N,d)
-    xxTs = tf.matmul(ones,tf.transpose(x_2))
-    tmp1 = tf.add(xxTs,tf.transpose(xxTs))
+    xxTs = tf.matmul(ones,tf.transpose(x_2,perm=(1,0)))
+    tmp1 = tf.add(xxTs,tf.transpose(xxTs,perm=(1,0)))
     tmp2 = tf.mul(tf.constant([-2.],dtype=tf.float32),xxT)
     kernel = tf.exp(tf.mul(tf.constant([-gama],dtype=tf.float32),tf.add(tmp1,tmp2)))
 
@@ -84,19 +84,19 @@ with tf.device('/gpu:0'):
 #test_kernel = tf.exp(tf.mul(tf.constant([-gama],dtype=tf.float32),tf.add(test_tmp1,test_tmp2)))
 
 
-
-#XXX setup the variables
-betas = tf.Variable(tf.truncated_normal([N, 1],dtype=tf.float32))
-
-#XXX kernel placeholder
-kernel_holder = tf.placeholder(tf.float32,shape=(N,N))
-#test_kernel_holder = tf.placeholder(tf.float32,shape=(M,N))
+with tf.device('/cpu:0'):
+    #XXX setup the variables
+    betas = tf.Variable(tf.truncated_normal([N, 1],dtype=tf.float32))
+    #betasT = tf.transpose(betas,perm=(1,0))
+    #XXX kernel placeholder
+    kernel_holder = tf.placeholder(tf.float32,shape=(N,N))
+    #test_kernel_holder = tf.placeholder(tf.float32,shape=(M,N))
 
 with tf.device('/gpu:0'):
     #the constants of equation
     lemda_const = tf.constant([lemda],dtype=tf.float32)
     #XXX formatting the loss function
-    first_term = tf.mul(lemda_const,tf.matmul(tf.matmul(tf.transpose(betas),kernel_holder),betas)) #regulerization
+    first_term = tf.mul(lemda_const,tf.reduce_sum(tf.mul(betas,tf.matmul(kernel_holder,betas)))) #regulerization
     second_term_tmp = tf.mul(tf.matmul(kernel_holder,betas),y)
     #second_term_tmp = tf.matmul(kernel_holder,betas)
     second_term = tf.log(tf.add(tf.constant([1],dtype=tf.float32),tf.exp(tf.mul(tf.constant([-1],dtype=tf.float32),second_term_tmp))))
@@ -111,17 +111,17 @@ with tf.Session() as session:
     kernel_variable = kernel.eval()
 
 
-
+print "kernel complete!"
 #with tf.Session() as session:
 #    test_kernel_variable = test_kernel.eval()
 
 #np.shape(test_kernel_variable)
-num_steps = 100000
+num_steps = 1000
 with tf.Session() as session:
     tf.initialize_all_variables().run()
     for step in range(num_steps):
         _,l,p= session.run([optimizer,loss,prediction], feed_dict={kernel_holder:kernel_variable})
-        if step%1000==0:
+        if step%10==0:
             txt = "loss = "+str(l)+" Ein = "+str(100*np.sum(p!=train_y)/float(p.shape[0]))#+" Eout = "+str(100*np.sum(tp!=test_y)/float(tp.shape[0]))
             print txt
             #time.sleep(0.5)
