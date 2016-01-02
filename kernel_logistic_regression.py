@@ -21,8 +21,8 @@ truth = np.genfromtxt('truth_train.txt', delimiter=',')
 
 
 
-train_x = np.matrix(data[20001:30001,1:])
-train_y = np.matrix(truth[20000:30000,1:])*2-1
+train_x = np.matrix(data[1:10001,1:])
+train_y = np.matrix(truth[:10000,1:])*2-1
 
 train_x = train_x/train_x.sum(axis = 0)
 
@@ -42,8 +42,8 @@ N = train_x.shape[0]
 #dim = test_x.shape[1]
 #M = test_x.shape[0]
 
-lemda = 10
-gama = 50000
+lemda = 5
+gama = 100000
 
 
 
@@ -116,13 +116,16 @@ print "kernel complete!"
 #    test_kernel_variable = test_kernel.eval()
 
 #np.shape(test_kernel_variable)
-num_steps = 1000
+num_steps = 10000
 with tf.Session() as session:
     tf.initialize_all_variables().run()
     for step in range(num_steps):
-        _,l,p= session.run([optimizer,loss,prediction], feed_dict={kernel_holder:kernel_variable})
+        _= session.run([optimizer], feed_dict={kernel_holder:kernel_variable})
         if step%10==0:
-            txt = "loss = "+str(l)+" Ein = "+str(100*np.sum(p!=train_y)/float(p.shape[0]))#+" Eout = "+str(100*np.sum(tp!=test_y)/float(tp.shape[0]))
+	    #p=prediction.eval(feed_dict={kernel_holder:kernel_variable})
+            #print type(p)
+	    _,p= session.run([optimizer,prediction], feed_dict={kernel_holder:kernel_variable})
+	    txt = " Ein = "+str(100*np.sum(p!=train_y)/float(p.shape[0]))#+" Eout = "+str(100*np.sum(tp!=test_y)/float(tp.shape[0]))
             print txt
             #time.sleep(0.5)
             #print '\r','loss = ',l,'accuracy = ',100*np.sum(p==target)/float(p.shape[0])
