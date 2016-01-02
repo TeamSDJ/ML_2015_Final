@@ -103,7 +103,7 @@ with tf.device('/gpu:0'):
     #second_term = tf.reduce_sum(tf.square(tf.sub(y,second_term_tmp)),0)
     loss = tf.add(first_term,tf.reduce_sum(second_term,0))
     #loss = tf.add(first_term,second_term)
-    optimizer = tf.train.GradientDescentOptimizer(0.00001).minimize(loss)
+    optimizer = tf.train.AdamOptimizer(0.001).minimize(loss)
     prediction = tf.sign(tf.matmul(kernel_holder,betas))
 #test_prediction = tf.sign(tf.matmul(test_kernel_holder,betas))
 
