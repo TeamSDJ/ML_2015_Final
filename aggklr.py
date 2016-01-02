@@ -74,8 +74,7 @@ with tf.device('/cpu:0'):
     kernel_holder = tf.placeholder(tf.float32,shape=(N,N))
     val_kernel_holder = tf.placeholder(tf.float32,shape=(M,N))
 
-with tf.device('/gpu:0'):
-    #the constants of equation
+def tfKLRLoss(y,betas,kernel_holder,lemda):
     lemda_const = tf.constant([lemda],dtype=tf.float32)
     #XXX formatting the loss function
     first_term = tf.mul(lemda_const,tf.reduce_sum(tf.mul(betas,tf.matmul(kernel_holder,betas)))) #regulerization
@@ -84,10 +83,19 @@ with tf.device('/gpu:0'):
     second_term = tf.log(tf.add(tf.constant([1],dtype=tf.float32),tf.exp(tf.mul(tf.constant([-1],dtype=tf.float32),second_term_tmp))))
     #second_term = tf.reduce_sum(tf.square(tf.sub(y,second_term_tmp)),0)
     loss = tf.add(first_term,tf.reduce_sum(second_term,0))
+    return loss
+
+def tfKLRPrediction(kernel_holder,betas):
+    prediction = tf.sign(tf.matmul(kernel_holder,betas))
+    return prediction
+
+with tf.device('/gpu:0'):
+    #the constants of equation
+    loss = tfKLRLoss(y,betas,kernel_holder,lemda)
     #loss = tf.add(first_term,second_term)
     optimizer = tf.train.AdamOptimizer(0.001).minimize(loss)
-    prediction = tf.sign(tf.matmul(kernel_holder,betas))
-    val_prediction = tf.sign(tf.matmul(val_kernel_holder,betas))
+    prediction = tfKLRPrediction(kernel_holder,betas)
+    val_prediction = tfKLRPrediction(val_kernel_holder,betas)
 
 saver = tf.train.Saver()
 
