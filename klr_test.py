@@ -35,6 +35,12 @@ M1 = test_x1.shape[0]
 M2 = test_x2.shape[0]
 print "train_size = ",N," test size = ",M1+M2
 
+with tf.device('/cpu:0'):
+    #XXX setup the variables
+    betas = tf.Variable(tf.zeros([N, 1],dtype=tf.float32))
+    #XXX kernel placeholder
+
+
 # the kernel for the 1st part test data
 with tf.device('/cpu:0'):
     #XXX setup the tf const for the training data
@@ -58,8 +64,8 @@ with tf.device('/cpu:0'):
 
     test1_kernel = tf.exp(tf.mul(tf.constant([-gama],dtype=tf.float32),tf.add(test1_tmp1,test1_tmp2)))
 
-# the kernel for the 2nd part test data
-with tf.device('/cpu:0'):
+    # the kernel for the 2nd part test data
+
     #XXX setup the tf const for the training data
 
     x = tf.constant(train_x,dtype=tf.float32) #(N,dim)
@@ -81,36 +87,17 @@ with tf.device('/cpu:0'):
 
     test2_kernel = tf.exp(tf.mul(tf.constant([-gama],dtype=tf.float32),tf.add(test2_tmp1,test2_tmp2)))
 
-
-
-with tf.device('/cpu:0'):
-    #XXX setup the variables
-    betas = tf.Variable(tf.zeros([N, 1],dtype=tf.float32))
-    #XXX kernel placeholder
-    test1_kernel_holder = tf.placeholder(tf.float32,shape=(M1,N))
-    test2_kernel_holder = tf.placeholder(tf.float32,shape=(M2,N))
-
-
-with tf.device('/cpu:0'):
-    test1_prediction = tf.sign(tf.matmul(test1_kernel_holder,betas))
-    test2_prediction = tf.sign(tf.matmul(test2_kernel_holder,betas))
-
+    test1_prediction = tf.sign(tf.matmul(test1_kernel,betas))
+    test2_prediction = tf.sign(tf.matmul(test2_kernel,betas))
 
 saver = tf.train.Saver()
 
-with tf.Session() as session:
-    test1_kernel_variable = test1_kernel.eval()
-
-with tf.Session() as session:
-    test2_kernel_variable = test2_kernel.eval()
-print "validation kernel complete!"
 num_steps = 1
 with tf.Session() as session:
     saver.restore(session,"klr_model.ckpt")
     for step in range(num_steps):
         if step%1==0:
-	    tp1,tp2= session.run([test1_prediction,test2_prediction], feed_dict={test1_kernel_holder:test1_kernel_variable,test2_kernel_holder:test2_kernel_variable})
-
+	    tp1,tp2= session.run([test1_prediction,test2_prediction])
 
 print "result generated"
 tp1 =(tp1+1)/2
