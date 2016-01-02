@@ -17,8 +17,8 @@ import matplotlib.pyplot as plt
 #test_data = [[float(element) for element in line.split()] for line in testfile]
 lemda = 0.5
 gama = 1000000000
-train_size = 10000
-val_size = 10000
+train_size = 15000
+val_size = 15000
 data = np.matrix(np.genfromtxt('sample_train_x.txt', delimiter=',')[1:,1:])
 truth = np.matrix(np.genfromtxt('truth_train.txt', delimiter=',')[:,1:])
 
@@ -98,7 +98,7 @@ with tf.device('/gpu:0'):
     optimizer = tf.train.AdamOptimizer(0.001).minimize(loss)
     prediction = tf.sign(tf.matmul(kernel_holder,betas))
     val_prediction = tf.sign(tf.matmul(val_kernel_holder,betas))
-
+saver = tf.train.Saver()
 with tf.Session() as session:
     kernel_variable = kernel.eval()
     #val_kernel_variable = val_kernel.eval()
@@ -108,16 +108,17 @@ with tf.Session() as session:
     val_kernel_variable = val_kernel.eval()
 print "validation kernel complete!"
 #np.shape(test_kernel_variable)
-num_steps = 10000
+num_steps = 100
 with tf.Session() as session:
     tf.initialize_all_variables().run()
     for step in range(num_steps):
         _= session.run([optimizer], feed_dict={kernel_holder:kernel_variable,val_kernel_holder:val_kernel_variable})
-        if step%10==0:
+        if step%1==0:
 	    #p=prediction.eval(feed_dict={kernel_holder:kernel_variable})
             #print type(p)
 	    _,p,vp= session.run([optimizer,prediction,val_prediction], feed_dict={kernel_holder:kernel_variable,val_kernel_holder:val_kernel_variable})
 	    txt = "Ein = "+str(100*np.sum(p!=train_y)/train_size) + " Eout = "+str(100*np.sum(vp!=val_y)/val_size)
             print txt
+    saver.save(session,"klr_model.ckpt")
             #time.sleep(0.5)
             #print '\r','loss = ',l,'accuracy = ',100*np.sum(p==target)/float(p.shape[0])
