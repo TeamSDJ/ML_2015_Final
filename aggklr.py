@@ -147,5 +147,5 @@ with tf.Session() as session:
             if step%10==0:
     	        p,vp= session.run([prediction_array[i],val_prediction_array[i]], feed_dict={kernel_holder_array[i]:kernel_variable_array[i],val_kernel_holder_array[i]:val_kernel_variable_array[i]})
     	        txt = " Ein = "+str(float(100*np.sum(p!=data_part(i)[1]))/float(N))+" Eout = "+str(float(100*np.sum(vp!=val_y))/float(M))
-                print txt,vp.shape(),val_y.shape(),vp,val_y
+                print txt,val_y.shape(),vp,val_y,type(vp)
         saver.save(session,"aggklr_model.ckpt")
