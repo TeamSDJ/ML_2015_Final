@@ -21,6 +21,8 @@ train_size = 15000
 val_size = 15000
 data = np.matrix(np.genfromtxt('sample_train_x.txt', delimiter=',')[1:,1:])
 truth = np.matrix(np.genfromtxt('truth_train.txt', delimiter=',')[:,1:])
+test_data = np.matrix(np.genfromtxt('sample_test_x.txt', delimiter=',')[1:,1:])
+test_data = test_data/test_data.sum(axis=0)
 
 data = data/data.sum(axis=0)
 truth = truth*2-1
@@ -30,8 +32,7 @@ train_y = truth[:train_size,:]
 np.shape(train_x)
 np.shape(train_y)
 
-val_x = data[train_size:train_size+val_size,:]
-val_y = truth[train_size:train_size+val_size,:]
+val_x = test_data
 
 dim = train_x.shape[1]
 N = train_x.shape[0]
@@ -39,16 +40,16 @@ N = train_x.shape[0]
 #dim = test_x.shape[1]
 M = val_x.shape[0]
 
-print "train_size = ",N," val size = ",M 
+print "train_size = ",N," val size = ",M
 #target = 1+2*np.random.randint(-1,high=1,size = (N,1))
 
 
-with tf.device('/gpu:0'):
+with tf.device('/cpu:0'):
     #XXX setup the tf const for the training data
     y = tf.constant(train_y,dtype=tf.float32) #(dim,1)
     x = tf.constant(train_x,dtype=tf.float32) #(N,dim)
 
-    y_v = tf.constant(val_y,dtype=tf.float32)
+    #y_v = tf.constant(val_y,dtype=tf.float32)
     x_v = tf.constant(val_x,dtype=tf.float32)
     #XXX formatting the kernel of training data:
     x_2 = tf.mul(x,x) #(N,d)
@@ -84,7 +85,7 @@ with tf.device('/cpu:0'):
     kernel_holder = tf.placeholder(tf.float32,shape=(N,N))
     val_kernel_holder = tf.placeholder(tf.float32,shape=(M,N))
 
-with tf.device('/gpu:0'):
+with tf.device('/cpu:0'):
     #the constants of equation
     #lemda_const = tf.constant([lemda],dtype=tf.float32)
     #XXX formatting the loss function
@@ -117,9 +118,15 @@ with tf.Session() as session:
         if step%1==0:
 	    #p=prediction.eval(feed_dict={kernel_holder:kernel_variable})
             #print type(p)
-	    p,vp= session.run([prediction,val_prediction], feed_dict={kernel_holder:kernel_variable,val_kernel_holder:val_kernel_variable})
-	    txt = "Ein = "+str(100*np.sum(p!=train_y)/train_size) + " Eout = "+str(100*np.sum(vp!=val_y)/val_size)
+	    p,tp= session.run([prediction,val_prediction], feed_dict={kernel_holder:kernel_variable,val_kernel_holder:val_kernel_variable})
+	    txt = "Ein = "+str(100*np.sum(p!=train_y)/train_size)
             print txt
+            print tp
     #saver.save(session,"klr_model.ckpt")
             #time.sleep(0.5)
             #print '\r','loss = ',l,'accuracy = ',100*np.sum(p==target)/float(p.shape[0])
+tp =(tp+1)/2
+result_file = open('result.txt','w')
+for i in range(tp.shape[0]):
+    result_file.write(str(int(tp[i,0]))+'\n')
+result_file.close()
