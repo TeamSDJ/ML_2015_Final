@@ -115,9 +115,9 @@ with tf.device('/gpu:0'):
         loss_array.append(tfKLRLoss(y_array[i],betas_array[i],kernel_holder_array[i],lemda))
     for i in range(6):
         optimizer_array.append(tf.train.AdamOptimizer(0.001).minimize(loss_array[i]))
-    #loss = tf.add(first_term,second_term)
+
     for i in range(6):
-        #prediction_array.append(tfKLRPrediction(kernel_holder_array[i],betas_array[i]))
+        prediction_array.append(tfKLRPrediction(kernel_holder_array[i],betas_array[i]))
         val_prediction_array.append(tfKLRPrediction(val_kernel_holder_array[i],betas_array[i]))
 
 
@@ -141,10 +141,11 @@ num_steps = 100
 with tf.Session() as session:
     tf.initialize_all_variables().run()
     for i in range(6):
+        print "part ",i
         for step in range(num_steps):
             _= session.run([optimizer_array[i]], feed_dict={kernel_holder_array[i]:kernel_variable_array[i],val_kernel_holder_array[i]:val_kernel_variable_array[i]})
             if step%10==0:
-    	        vp= session.run(val_prediction_array[i], feed_dict={kernel_holder_array[i]:kernel_variable_array[i],val_kernel_holder_array[i]:val_kernel_variable_array[i]})
-    	        txt = " Eout = "+str(float(100*np.sum(vp!=val_y))/float(M))
+    	        p,vp= session.run([prediction_array[i],val_prediction_array[i]], feed_dict={kernel_holder_array[i]:kernel_variable_array[i],val_kernel_holder_array[i]:val_kernel_variable_array[i]})
+    	        txt = " Ein = "+str(float(100*np.sum(p!=data_part(i)[1]))/float(N))+" Eout = "+str(float(100*np.sum(vp!=val_y))/float(M))
                 print txt
         saver.save(session,"aggklr_model.ckpt")
