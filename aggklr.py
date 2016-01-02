@@ -137,14 +137,14 @@ with tf.Session() as session:
         val_kernel_variable_array.append(val_kernel_array[i].eval())
 
 print "validation kernel operation complete!"
-num_steps = 100
+num_steps = 20
 with tf.Session() as session:
     tf.initialize_all_variables().run()
     for i in range(6):
         print "part ",i
         for step in range(num_steps):
             _= session.run([optimizer_array[i]], feed_dict={kernel_holder_array[i]:kernel_variable_array[i],val_kernel_holder_array[i]:val_kernel_variable_array[i]})
-            if step%10==0:
+            if step%1==0:
     	        p,vp= session.run([prediction_array[i],val_prediction_array[i]], feed_dict={kernel_holder_array[i]:kernel_variable_array[i],val_kernel_holder_array[i]:val_kernel_variable_array[i]})
     	        txt = " Ein = "+str(float(100*np.sum(p!=data_part(i)[1]))/float(N))+" Eout = "+str(float(100*np.sum(vp!=val_y))/float(M))
                 print txt
