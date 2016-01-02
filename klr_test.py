@@ -1,35 +1,42 @@
+# NOTE 2016/1/2 :
+#  - In this program, I do the prediction of testing data by the KLR model,
+# with the beta variables stored in klr_model.ckpt.
+# - I try to split the testing kernel into two so that the memory of GPU are able to
+# handle the tranmendous amount of testing data!
+
 
 import numpy as np
 import tensorflow as tf
 import time
 import sys
-import matplotlib.pyplot as plt
+
 #XXX read in the files
 
 #XXX First reload the data we generated in 1_notmist.ipynb.
 
+# NOTE : the model const lemda and kernel const are choosen by try-and-error
 lemda = 0.5
 gama = 1000000000
-train_size = 15000
 
+# NOTE : here we use the first 15000 training data to calculate the training-testing data!
+train_size = 15000
 data = np.matrix(np.genfromtxt('sample_train_x.txt', delimiter=',')[1:,1:])
 truth = np.matrix(np.genfromtxt('truth_train.txt', delimiter=',')[:,1:])
-test_data = np.matrix(np.genfromtxt('sample_test_x.txt', delimiter=',')[1:,1:])
-test_data = test_data/test_data.sum(axis=0)
 
-data = data/data.sum(axis=0)
-truth = truth*2-1
+data = data/data.sum(axis=0) #NOTE: do the normalization
 train_x = data[:train_size,:]
 train_y = truth[:train_size,:]
 
-np.shape(train_x)
-np.shape(train_y)
 
+test_data = np.matrix(np.genfromtxt('sample_test_x.txt', delimiter=',')[1:,1:])
+test_data = test_data/test_data.sum(axis=0) #NOTE : do the normalization
+
+
+# NOTE: splitting the testing data
 test_x1 = test_data[:15000,:]
 test_x2 = test_data[15000:,:]
 dim = train_x.shape[1]
 N = train_x.shape[0]
-
 
 M1 = test_x1.shape[0]
 M2 = test_x2.shape[0]
