@@ -144,8 +144,8 @@ with tf.Session() as session:
         print "part ",i
         for step in range(num_steps):
             #_= session.run([optimizer_array[i]], feed_dict={kernel_holder_array[i]:kernel_variable_array[i],val_kernel_holder_array[i]:val_kernel_variable_array[i]})
-	        p,vp= session.run([prediction_array[i],val_prediction_array[i]], feed_dict={kernel_holder_array[i]:kernel_variable_array[i],val_kernel_holder_array[i]:val_kernel_variable_array[i]})
-	        txt = " Ein = "+str(float(100*np.sum(np.matrix(p)!=data_part(i)[1]))/float(N))+" Eout = "+str(float(100*np.sum(np.matrix(vp)!=val_y))/float(M))
+	    p,vp= session.run([prediction_array[i],val_prediction_array[i]], feed_dict={kernel_holder_array[i]:kernel_variable_array[i],val_kernel_holder_array[i]:val_kernel_variable_array[i]})
+	    txt = " Ein = "+str(float(100*np.sum(np.matrix(p)!=data_part(i)[1]))/float(N))+" Eout = "+str(float(100*np.sum(np.matrix(vp)!=val_y))/float(M))
             print txt
 
 # TODO do some shattering
