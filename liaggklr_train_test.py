@@ -144,7 +144,7 @@ with tf.device('/cpu:0'):
     optimizer = tf.train.AdamOptimizer(0.01).minimize(loss)
     prediction = tf.sign(tf.matmul(embedding,weights))
 
-num_steps = 500
+num_steps = 10000
 with tf.Session() as session:
     tf.initialize_all_variables().run()
     for step in range(num_steps):
@@ -192,3 +192,5 @@ for i in range(tp.shape[0]):
     result_file.write(str(int(tp[i,0]))+'\n')
 
 result_file.close()
+
+# NOTE: more training time of the linear aggregation didn't gives better Eout
