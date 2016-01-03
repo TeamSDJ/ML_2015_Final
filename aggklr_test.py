@@ -59,37 +59,6 @@ def tfGaussianKernel(xn,xm,gama):
     tmp2 = tf.mul(tf.constant([-2.],dtype=tf.float32),xxTmn)
     kernel = tf.exp(tf.mul(tf.constant([-gama],dtype=tf.float32),tf.add(tmp1,tmp2)))
     return kernel
-
-with tf.device('/cpu:0'):
-    #XXX setup the tf const for the training data
-    y_array = []
-    x_array = []
-    for i in range(6):
-        y_array.append(tf.constant(data_part(i)[1],dtype=tf.float32)) #(dim,1)
-        x_array.append(tf.constant(data_part(i)[0],dtype=tf.float32)) #(N,dim)
-
-    y_v = tf.constant(data_part(6)[1],dtype=tf.float32)
-    x_v = tf.constant(data_part(6)[0],dtype=tf.float32)
-    #XXX formatting the kernel of training data & validation data:
-    kernel_array = []
-    val_kernel_array = []
-    for i in range(6):
-        kernel_array.append(tfGaussianKernel(x_array[i],x_array[i],gama))
-        val_kernel_array.append(tfGaussianKernel(x_array[i],x_v,gama))
-
-with tf.device('/cpu:0'):
-    #XXX setup all variables
-    betas_array = []
-    for i in range(6):
-        betas_array.append(tf.Variable(tf.zeros([N, 1],dtype=tf.float32)))
-    #XXX kernel placeholder
-    kernel_holder_array = []
-    val_kernel_holder_array = []
-    for i in range(6):
-        kernel_holder_array.append(tf.placeholder(tf.float32,shape=(N,N)))
-        val_kernel_holder_array.append(tf.placeholder(tf.float32,shape=(M,N)))
-
-
 def tfKLRLoss(y,betas,kernel_holder,lemda):
     lemda_const = tf.constant([lemda],dtype=tf.float32)
     #XXX formatting the loss function
@@ -104,48 +73,48 @@ def tfKLRLoss(y,betas,kernel_holder,lemda):
 def tfKLRPrediction(kernel_holder,betas):
     prediction = tf.sign(tf.matmul(kernel_holder,betas))
     return prediction
+def tfKLRPredictionNoKernel(x_model,xin,betas,gama):
+    kernel_ = tfGaussianKernel(x_model,xin,gama)
+    return tfKLRPrediction(kernel_,betas)
 
 with tf.device('/cpu:0'):
-    #the constants of equation
-    loss_array = []
-    optimizer_array = []
+    #XXX setup all variables
+    betas_array = []
+    for i in range(6):
+        betas_array.append(tf.Variable(tf.zeros([N, 1],dtype=tf.float32)))
+    #XXX kernel placeholder
+
+
+with tf.device('/cpu:0'):
+    #XXX setup the tf const for the training data
+
+    x_array = []
+    for i in range(6):
+        x_array.append(tf.constant(data_part(i)[0],dtype=tf.float32)) #(N,dim)
+
+    x_v = tf.constant(data_part(6)[0],dtype=tf.float32)
+
     prediction_array = []
     val_prediction_array = []
-    for i in range(6):
-        loss_array.append(tfKLRLoss(y_array[i],betas_array[i],kernel_holder_array[i],lemda))
-    for i in range(6):
-        optimizer_array.append(tf.train.AdamOptimizer(0.001).minimize(loss_array[i]))
 
     for i in range(6):
-        prediction_array.append(tfKLRPrediction(kernel_holder_array[i],betas_array[i]))
-        val_prediction_array.append(tfKLRPrediction(val_kernel_holder_array[i],betas_array[i]))
+        prediction_array.append(tfKLRPredictionNoKernel(x_array[i],x_array[i],betas_array[i],gama))
+        val_prediction_array.append(tfKLRPredictionNoKernel(x_array[i],x_v,betas_array[i],gama))
 
 
 saver = tf.train.Saver()
 
-with tf.Session() as session:
-    kernel_variable_array = []
-    for i in range(6):
-        kernel_variable_array.append(kernel_array[i].eval())
-    #val_kernel_variable = val_kernel.eval()
-
-print "kernel operation complete!"
-
-with tf.Session() as session:
-    val_kernel_variable_array = []
-    for i in range(6):
-        val_kernel_variable_array.append(val_kernel_array[i].eval())
-
-print "validation kernel operation complete!"
 num_steps = 1
 with tf.Session() as session:
     saver.restore(session,"aggklr_model.ckpt")
     for i in range(6):
         print "part ",i
         for step in range(num_steps):
-            #_= session.run([optimizer_array[i]], feed_dict={kernel_holder_array[i]:kernel_variable_array[i],val_kernel_holder_array[i]:val_kernel_variable_array[i]})
-	        p,vp= session.run([prediction_array[i],val_prediction_array[i]], feed_dict={kernel_holder_array[i]:kernel_variable_array[i],val_kernel_holder_array[i]:val_kernel_variable_array[i]})
-	        txt = " Ein = "+str(float(100*np.sum(np.matrix(p)!=data_part(i)[1]))/float(N))+" Eout = "+str(float(100*np.sum(np.matrix(vp)!=val_y))/float(M))
-        print txt
+            if step%10==0:
+    	        p,vp= session.run([prediction_array[i],val_prediction_array[i]])
+    	        txt = " Ein = "+str(float(100*np.sum(np.matrix(p)!=data_part(i)[1]))/float(N))+" Eout = "+str(float(100*np.sum(np.matrix(vp)!=val_y))/float(M))
+                print txt
 
-# TODO do some shattering
+
+
+# TODO input all data
