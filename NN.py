@@ -15,9 +15,18 @@ data_size = truth.shape[0]
 d = data.shape[1]
 
 # important settings
-layer_size = [d,512,1024,1024,512,1]
+layer_size = [d,64,128,64,1]
+
+def weight_size(layer_size):
+    sum_ = 0
+    for i in range(len(layer_size)-1):
+        sum_ = sum_+layer_size[i]*layer_size[i+1]+layer_size[i+1]
+    return sum_
+
+print "variable size = ",weight_size(layer_size)
 batch_size = 1000
 step_num = 10000
+learning_rate = 1e-6
 
 layer_num = len(layer_size)
 
@@ -46,17 +55,19 @@ with tf.device('/cpu:0'):
         b_array.append(tf.Variable(tf.constant(0.1, shape=[layer_size[i+1]])))
     x = tf.placeholder("float", shape=[None, d])
     y = tf.placeholder("float", shape=[None, 1])
+    keep_prob = tf.placeholder("float") #for dropout
+
 
 # network construction
-with tf.device('/cpu:0'):
+with tf.device('/gpu:0'):
     h_array = []
     h = x
     for i in range(layer_num-2):
-        h = tf.nn.tanh(tf.matmul(h, w_array[i]) + b_array[i])
+        h = tf.nn.dropout(tf.nn.tanh(tf.matmul(h, w_array[i]) + b_array[i]),keep_prob)
         h_array.append(h)
     out = tf.matmul(h_array[-1],w_array[-1]) + b_array[-1]
     loss = tf.reduce_sum(tf.square(y-out))#the objective function
-    train_step = tf.train.AdamOptimizer(1e-4).minimize(loss)#the optimizer
+    train_step = tf.train.AdamOptimizer(learning_rate).minimize(loss)#the optimizer
     prediction = tf.equal(tf.sign(out),y)#for testing
 
 
@@ -65,16 +76,16 @@ accuracy = tf.reduce_mean(tf.cast(prediction, "float"))
 init_op = tf.initialize_all_variables()
 
 
-
+saver = tf.train.Saver()
 with tf.Session() as sess:
     sess.run(init_op)
     x_batch , y_batch = rand_batch(batch_size)
     # Training :
     for i in tqdm.tqdm(range(step_num)):
         if i%7 == 0:
-            acc = sess.run(accuracy,feed_dict={x:x_batch, y: y_batch})
+            acc = sess.run(accuracy,feed_dict={x:x_batch, y: y_batch,keep_prob:1.})
             print acc
 
         # the exact output you're looking for:
         x_batch , y_batch = rand_batch(batch_size)
-        train_step.run(feed_dict={x:x_batch, y: y_batch})
+        train_step.run(feed_dict={x:x_batch, y: y_batch,keep_prob:0.5})
