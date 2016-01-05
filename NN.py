@@ -25,8 +25,8 @@ def weight_size(layer_size):
 
 print "variable size = ",weight_size(layer_size)
 batch_size = 1000
-step_num = 10000
-learning_rate = 1e-6
+step_num = 1000000
+learning_rate = 1e-3
 
 layer_num = len(layer_size)
 
@@ -78,14 +78,16 @@ init_op = tf.initialize_all_variables()
 
 saver = tf.train.Saver()
 with tf.Session() as sess:
-    sess.run(init_op)
+    #sess.run(init_op)
+    saver.restore(sess,"DNN64-128-64.ckpt")
     x_batch , y_batch = rand_batch(batch_size)
     # Training :
     for i in tqdm.tqdm(range(step_num)):
-        if i%7 == 0:
+        if i%100 == 0:
             acc = sess.run(accuracy,feed_dict={x:x_batch, y: y_batch,keep_prob:1.})
             print acc
-
+            saver.save(sess,"DNN64-128-64.ckpt")
         # the exact output you're looking for:
         x_batch , y_batch = rand_batch(batch_size)
         train_step.run(feed_dict={x:x_batch, y: y_batch,keep_prob:0.5})
+       
