@@ -1,0 +1,59 @@
+outcome of adding total problem:
+Eoob= 0.135097579692
+server_wiki 13(least important)              
+take_course_num 2
+browser_access 8
+server_discussion 12
+server_problem 7
+course_log_num 1
+video_count 16
+take_user_num 3
+browser_video 11
+user_log_num 0
+browser_problem 9
+total_problem 17
+server_nagivate 5
+chapter_count 14
+browser_page_close 10
+sequential_count 15
+log_num 4
+server_access 6(most important)
+
+outcome of adding total problem but delete ser/brows:
+Eoob= 0.135512371155
+server_wiki 13(least important)   
+server_discussion 12
+take_course_num 2
+browser_access 8
+course_log_num 1
+video_count 16
+take_user_num 3
+browser_video 11
+user_log_num 0
+total_problem 17
+server_nagivate 5
+browser_page_close 10
+chapter_count 14
+sequential_count 15
+log_num 4
+server_access 6(most important)   
+
+outcome of origin train:
+Eoob= 0.135118319265
+server_wiki 13(least important)   
+take_course_num 2
+browser_access 8
+server_discussion 12
+server_problem 7
+course_log_num 1
+video_count 16
+take_user_num 3
+browser_video 11
+user_log_num 0
+server_nagivate 5
+browser_problem 9
+browser_page_close 10
+chapter_count 14
+sequential_count 15
+log_num 4
+server_access 6(most important)   
