@@ -16,7 +16,7 @@ import sys
 
 # NOTE : the model const lemda and kernel const are choosen by try-and-error
 lemda = 0.5
-gama = 1e+1
+gama = 1e+9
 
 # NOTE : here we use the first 15000 training data to calculate the training-testing data!
 train_size = 15000
