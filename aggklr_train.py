@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 # for larger gama , we can get smaller Eval, however, for too large gamm, Eval increase
 # the lemda should be set low, so that the learning can be faster. (Larger panelty on cross-entropy)
 lemda = 0.5
-gama = 1000000000
+gama = 1e-5
 
 # NOTE : set the training_size and val_size to 15000, so the the GPU memory can handle
 train_size = 15000
@@ -145,7 +145,7 @@ with tf.Session() as session:
         print "part ",i
         for step in range(num_steps):
             _= session.run([optimizer_array[i]], feed_dict={kernel_holder_array[i]:kernel_variable_array[i],val_kernel_holder_array[i]:val_kernel_variable_array[i]})
-            if step%10==0:
+            if step%1==0:
     	        p,vp= session.run([prediction_array[i],val_prediction_array[i]], feed_dict={kernel_holder_array[i]:kernel_variable_array[i],val_kernel_holder_array[i]:val_kernel_variable_array[i]})
     	        txt = " Ein = "+str(float(100*np.sum(np.matrix(p)!=data_part(i)[1]))/float(N))+" Eout = "+str(float(100*np.sum(np.matrix(vp)!=val_y))/float(M))
                 print txt
