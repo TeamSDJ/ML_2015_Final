@@ -148,7 +148,7 @@ print "result = \n",result
 #result = (result+1)/2
 result_file = open('aggresult_processed.txt','w')
 for i in range(result.shape[0]):
-    result_file.write(str(int(result[i,0]))+'\n')
+    result_file.write(str(float(result[i,0]))+'\n')
 
 result_file.close()
 
