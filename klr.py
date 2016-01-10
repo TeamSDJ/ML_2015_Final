@@ -96,8 +96,8 @@ with tf.device('/gpu:0'):
     loss = tf.add(first_term,tf.reduce_sum(second_term,0))
     #loss = tf.add(first_term,second_term)
     optimizer = tf.train.AdamOptimizer(0.001).minimize(loss)
-    prediction = tf.sign(tf.matmul(kernel_holder,betas))
-    val_prediction = tf.sign(tf.matmul(val_kernel_holder,betas))
+    prediction = tf.nn.sigmoid(tf.matmul(val_kernel_holder,betas))#tf.sign(tf.matmul(kernel_holder,betas))
+    val_prediction = tf.nn.sigmoid(tf.matmul(val_kernel_holder,betas))
 
 saver = tf.train.Saver()
 

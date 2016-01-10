@@ -94,8 +94,8 @@ with tf.device('/cpu:0'):
 
     test2_kernel = tf.exp(tf.mul(tf.constant([-gama],dtype=tf.float32),tf.add(test2_tmp1,test2_tmp2)))
 
-    test1_prediction = tf.sign(tf.matmul(test1_kernel,betas))
-    test2_prediction = tf.sign(tf.matmul(test2_kernel,betas))
+    test1_prediction = tf.sigmoid(tf.matmul(test1_kernel,betas))
+    test2_prediction = tf.sigmoid(tf.matmul(test2_kernel,betas))
 
 saver = tf.train.Saver()
 
@@ -107,11 +107,11 @@ with tf.Session() as session:
 	    tp1,tp2= session.run([test1_prediction,test2_prediction])
 
 print "result generated"
-tp1 =(tp1+1)/2
-tp2 =(tp2+1)/2
+#tp1 =(tp1+1)/2
+#tp2 =(tp2+1)/2
 result_file = open('resultprocessed.txt','w')
 for i in range(tp1.shape[0]):
-    result_file.write(str(int(tp1[i,0]))+'\n')
+    result_file.write(str(float(tp1[i,0]))+'\n')
 for i in range(tp2.shape[0]):
-    result_file.write(str(int(tp2[i,0]))+'\n')
+    result_file.write(str(float(tp2[i,0]))+'\n')
 result_file.close()
