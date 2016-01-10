@@ -2,30 +2,7 @@ import os
 import time
 import numpy as np
 from sklearn.ensemble         import GradientBoostingClassifier
-from sklearn.preprocessing    import StandardScaler
 from sklearn.cross_validation import KFold
-
-def logFileTimeCount(ORI_DATA):
-    DATA    = np.bincount(ORI_DATA[:, 0].astype(int))
-    DATA_ID = np.nonzero(DATA)[0]
-    D_COUNT = np.vstack((DATA_ID, DATA[DATA_ID])).T[:, 1]
-
-    timeTot = []
-    cursor  = 0
-    for idx in range(len(D_COUNT)):
-        timeArr = []
-        enrollCount = D_COUNT[idx]
-        for row in range(cursor, (cursor + enrollCount)):
-            timeArr.append(np.datetime64(ORI_DATA[row][1]))
-        cursor    += enrollCount
-        startTime =  min(timeArr)
-        logCount  =  0
-        for time in timeArr:
-            if (time - startTime).item().total_seconds() >= (86400 * 20):
-                logCount += 1
-        D_COUNT[idx] = logCount
-        timeTot.append((max(timeArr) - min(timeArr)).item().total_seconds())
-    return np.column_stack((D_COUNT, np.array(timeTot)))
 
 def delFeatMin(arr, num):
     N = len(arr)
@@ -39,9 +16,9 @@ def delFeatMin(arr, num):
 
 def gbPredict(LOSS, N_EST, L_RATE, M_DEPT, SUB_S, W_START, N_FOLD, EX_F, TRAIN_DATA_X, TRAIN_DATA_Y, TEST__DATA_X, isProb):
     # feature extraction
-    clf  = GradientBoostingClassifier(loss=LOSS, n_estimators=N_EST, learning_rate=L_RATE, max_depth=M_DEPT, subsample=SUB_S, warm_start=W_START).fit(TRAIN_DATA_X, TRAIN_DATA_Y)
-    extA = delFeatMin(clf.feature_importances_, EX_F)
-    TRAIN_DATA_X = TRAIN_DATA_X[:, extA]
+    ### clf  = GradientBoostingClassifier(loss=LOSS, n_estimators=N_EST, learning_rate=L_RATE, max_depth=M_DEPT, subsample=SUB_S, warm_start=W_START).fit(TRAIN_DATA_X, TRAIN_DATA_Y)
+    ### extA = delFeatMin(clf.feature_importances_, EX_F)
+    ### TRAIN_DATA_X = TRAIN_DATA_X[:, extA]
     # k-fold validation
     kf   = KFold(TRAIN_DATA_Y.shape[0], n_folds=N_FOLD)
     tesV = 0.0
@@ -96,9 +73,9 @@ def main():
 
     # files path
     INPUT_FILE   = "../../ML_final_project/enrollment_test.csv"
-    TRAIN_FILE_X = "../../ML_final_project/train_x_processed.csv"
-    TRAIN_FILE_Y = "../../ML_final_project/train_y_processed.csv"
-    TEST__FILE_X = "../../ML_final_project/test__x_processed.csv"
+    TRAIN_FILE_X = "../../New_Features/train_x_processed.csv"
+    TRAIN_FILE_Y = "../../New_Features/train_y_processed.csv"
+    TEST__FILE_X = "../../New_Features/test__x_processed.csv"
     # load files
     TRAIN_DATA_X = np.loadtxt(TRAIN_FILE_X, delimiter=',')
     TRAIN_DATA_Y = np.loadtxt(TRAIN_FILE_Y)
