@@ -22,7 +22,7 @@ gama = 1000000000
 train_size = 15000
 
 peace_num = 6
-data = np.matrix(np.genfromtxt('sample_train_x.txt', delimiter=',')[1:,1:])
+data = np.matrix(np.genfromtxt('train_x_processed.txt', delimiter=',')[1:,1:])
 truth = np.matrix(np.genfromtxt('truth_train.txt', delimiter=',')[:,1:])
 
 # NOTE:normalization and shift the target to +1 -1
@@ -34,7 +34,7 @@ def data_part(part,N = train_size): # 0~5 training set # 6th part is the validat
     train_y = truth[part*N:part*N+N,:]
     return train_x,train_y
 
-test_data = np.matrix(np.genfromtxt('sample_test_x.txt', delimiter=',')[1:,1:])
+test_data = np.matrix(np.genfromtxt('test_x_processed.txt', delimiter=',')[1:,1:])
 test_data = test_data/test_data.sum(axis=0) #NOTE : do the normalization
 
 

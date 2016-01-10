@@ -22,9 +22,10 @@ gama = 1000000000
 train_size = 15000
 
 peace_num = 6
-data = np.matrix(np.genfromtxt('sample_train_x.txt', delimiter=',')[1:,1:])
+data = np.matrix(np.genfromtxt('train_x_processed.txt', delimiter=',')[1:,1:])
 truth = np.matrix(np.genfromtxt('truth_train.txt', delimiter=',')[:,1:])
 
+np.shape(data)
 # NOTE:normalization and shift the target to +1 -1
 data = data/data.sum(axis=0)
 truth = truth*2-1
@@ -41,7 +42,7 @@ dim = val_x.shape[1]
 M = val_x.shape[0]
 N = train_size
 
-print "train_size = ",N," val size = ",M
+print "train_size = ",N," val size = ",M,"dim = ",dim
 #target = 1+2*np.random.randint(-1,high=1,size = (N,1))
 
 def tfGaussianKernel(xn,xm,gama):
