@@ -21,7 +21,7 @@ gama = 1e+1
 # NOTE : set the training_size and val_size to 15000, so the the GPU memory can handle
 train_size = 15000
 val_size = 15000
-data = np.matrix(np.genfromtxt('train_x_processed.txt', delimiter=',')[1:,1:])
+data = np.matrix(np.genfromtxt('train_x.txt', delimiter=',')[1:,1:])
 truth = np.matrix(np.genfromtxt('truth_train.txt', delimiter=',')[:,1:])
 
 #data = data/data.sum(axis=0) # NOTE:normalization

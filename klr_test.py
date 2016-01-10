@@ -20,7 +20,7 @@ gama = 1e+1
 
 # NOTE : here we use the first 15000 training data to calculate the training-testing data!
 train_size = 15000
-data = np.matrix(np.genfromtxt('train_x_processed.txt', delimiter=',')[1:,1:])
+data = np.matrix(np.genfromtxt('train_x.txt', delimiter=',')[1:,1:])
 truth = np.matrix(np.genfromtxt('truth_train.txt', delimiter=',')[:,1:])
 
 data = data/data.sum(axis=0) #NOTE: do the normalization
@@ -28,7 +28,7 @@ train_x = data[:train_size,:]
 train_y = truth[:train_size,:]
 
 
-test_data = np.matrix(np.genfromtxt('test_x_processed.txt', delimiter=',')[1:,1:])
+test_data = np.matrix(np.genfromtxt('test_x.txt', delimiter=',')[1:,1:])
 test_data = test_data/test_data.sum(axis=0) #NOTE : do the normalization
 
 
