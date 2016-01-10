@@ -49,35 +49,32 @@ def main():
     
     t0 = time.time() # start time
 
-    # files path
-    TRAINX_OUTPUT = "../../ML_final_project/train_x_processed.csv"
-    TRAINY_OUTPUT = "../../ML_final_project/train_y_processed.csv"
-    TEST_X_OUTPUT = "../../ML_final_project/test__x_processed.csv"
-
+    # output files path
+    TRAINX_OUTPUT = "../../New_Features/train_x_processed.csv"
+    TEST_X_OUTPUT = "../../New_Features/test__x_processed.csv"
+    # input files path
     TRAIN_FILE_X1 = "../../ML_final_project/sample_train_x.csv"
     TRAIN_FILE_X2 = "../../ML_final_project/log_train.csv"
-    TRAIN_FILE_Y0 = "../../ML_final_project/truth_train.csv"
     TEST__FILE_X1 = "../../ML_final_project/sample_test_x.csv"
     TEST__FILE_X2 = "../../ML_final_project/log_test.csv"
-
-    TRAIN_DATA_Y0 = np.loadtxt(TRAIN_FILE_Y0, delimiter=',')
+    # load files
     TRAIN_DATA_X1 = np.loadtxt(TRAIN_FILE_X1, delimiter=',', skiprows=1, usecols=(range(1, 18)))
     TEST__DATA_X1 = np.loadtxt(TEST__FILE_X1, delimiter=',', skiprows=1, usecols=(range(1, 18)))
     TRAIN_DATA_X2 = logFileTimeCount(np.loadtxt(TRAIN_FILE_X2, delimiter=',', skiprows=1, dtype=object))
     TEST__DATA_X2 = logFileTimeCount(np.loadtxt(TEST__FILE_X2, delimiter=',', skiprows=1, dtype=object))
-
+    # combine files
     TRAIN_DATA_X0 = np.column_stack((TRAIN_DATA_X1, TRAIN_DATA_X2))
     TEST__DATA_X0 = np.column_stack((TEST__DATA_X1, TEST__DATA_X2))
     # data preprocessing
     scaler = StandardScaler()
     TRAIN_DATA_X = scaler.fit_transform(TRAIN_DATA_X0)
-    TRAIN_DATA_Y = TRAIN_DATA_Y0[:, (TRAIN_DATA_Y0.shape[1] - 1)]
     TEST__DATA_X = scaler.transform(TEST__DATA_X0)
-
+    # output processed files
     outputXFile(TRAINX_OUTPUT, TRAIN_DATA_X)
-    outputYFile(TRAINY_OUTPUT, TRAIN_DATA_Y)
     outputXFile(TEST_X_OUTPUT, TEST__DATA_X)
+
     t1 = time.time() # end time
+    print "...This task costs " + str(t1 - t0) + " second."
 
 if __name__ == '__main__':
     main()
