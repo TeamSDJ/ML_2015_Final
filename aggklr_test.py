@@ -16,13 +16,13 @@ import matplotlib.pyplot as plt
 # for larger gama , we can get smaller Eval, however, for too large gamm, Eval increase
 # the lemda should be set low, so that the learning can be faster. (Larger panelty on cross-entropy)
 lemda = 0.5
-gama = 1000000000
+gama = 1e9
 
 # NOTE : set the training_size and val_size to 15000, so the the GPU memory can handle
 train_size = 15000
 
 peace_num = 6
-data = np.matrix(np.genfromtxt('sample_train_x.txt', delimiter=',')[1:,1:])
+data = np.matrix(np.genfromtxt('train_x.txt', delimiter=',')[1:,1:])
 truth = np.matrix(np.genfromtxt('truth_train.txt', delimiter=',')[:,1:])
 
 # NOTE:normalization and shift the target to +1 -1
