@@ -16,15 +16,15 @@ import matplotlib.pyplot as plt
 # for larger gama , we can get smaller Eval, however, for too large gamm, Eval increase
 # the lemda should be set low, so that the learning can be faster. (Larger panelty on cross-entropy)
 lemda = 0.5
-gama = 1000000000
+gama = 1e+1
 
 # NOTE : set the training_size and val_size to 15000, so the the GPU memory can handle
 train_size = 15000
 val_size = 15000
-data = np.matrix(np.genfromtxt('sample_train_x.txt', delimiter=',')[1:,1:])
+data = np.matrix(np.genfromtxt('train_x_processed.txt', delimiter=',')[1:,1:])
 truth = np.matrix(np.genfromtxt('truth_train.txt', delimiter=',')[:,1:])
 
-data = data/data.sum(axis=0) # NOTE:normalization
+#data = data/data.sum(axis=0) # NOTE:normalization
 truth = truth*2-1
 train_x = data[:train_size,:]
 train_y = truth[:train_size,:]
@@ -117,6 +117,7 @@ with tf.Session() as session:
         if step%1==0:
 
 	    _,p,vp= session.run([optimizer,prediction,val_prediction], feed_dict={kernel_holder:kernel_variable,val_kernel_holder:val_kernel_variable})
-	    txt = "Ein = "+str(100*np.sum(p!=train_y)/train_size) + " Eout = "+str(100*np.sum(vp!=val_y)/val_size)
+	    txt = "Ein = "+str(100*float(np.sum(p!=train_y))/float(train_size)) + " Eout = "+str(float(100*np.sum(vp!=val_y))/float(val_size))
+
             print txt
-    saver.save(session,"klr_model.ckpt")
+    saver.save(session,"klr_model_processed.ckpt")
