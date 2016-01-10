@@ -59,7 +59,7 @@ with tf.device('/cpu:0'):
 
 
 # network construction
-with tf.device('/gpu:0'):
+with tf.device('/cpu:0'):
     h_array = []
     h = x
     for i in range(layer_num-2):
@@ -90,4 +90,3 @@ with tf.Session() as sess:
         # the exact output you're looking for:
         x_batch , y_batch = rand_batch(batch_size)
         train_step.run(feed_dict={x:x_batch, y: y_batch,keep_prob:0.5})
-       
