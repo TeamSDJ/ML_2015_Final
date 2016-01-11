@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 # the lemda should be set low, so that the learning can be faster. (Larger panelty on cross-entropy)
 lemda = 0.5
 gama = 1e9
-
+learning_rate = [0.01,0.001,0.001,0.001,0.001,0.001]
 # NOTE : set the training_size and val_size to 15000, so the the GPU memory can handle
 train_size = 15000
 
@@ -126,7 +126,7 @@ with tf.device('/gpu:0'):
     for i in range(6):
         loss_array.append(tfKLRLoss(y_array[i],betas_array[i],kernel_holder_array[i],lemda))
     for i in range(6):
-        optimizer_array.append(tf.train.AdamOptimizer(0.01).minimize(loss_array[i]))
+        optimizer_array.append(tf.train.AdamOptimizer(learning_rate[i]).minimize(loss_array[i]))
 
     for i in range(6):
         error_array.append(tfError(y_array[i],betas_array[i],kernel_holder_array[i],lemda))
@@ -155,7 +155,7 @@ with tf.Session() as session:
         val_kernel_variable_array.append(val_kernel_array[i].eval())
 
 print "validation kernel operation complete!"
-num_steps = 100
+num_steps = 1000
 with tf.Session() as session:
     tf.initialize_all_variables().run()
     for i in range(6):
