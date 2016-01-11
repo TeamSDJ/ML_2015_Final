@@ -43,7 +43,7 @@ print "train_size = ",N," val size = ",M
 #target = 1+2*np.random.randint(-1,high=1,size = (N,1))
 
 
-with tf.device('/gpu:0'):
+with tf.device('/cpu:0'):
     #XXX setup the tf const for the training data
     y = tf.constant(train_y,dtype=tf.float32) #(dim,1)
     x = tf.constant(train_x,dtype=tf.float32) #(N,dim)
@@ -84,7 +84,7 @@ with tf.device('/cpu:0'):
     kernel_holder = tf.placeholder(tf.float32,shape=(N,N))
     val_kernel_holder = tf.placeholder(tf.float32,shape=(M,N))
 
-with tf.device('/gpu:0'):
+with tf.device('/cpu:0'):
     #the constants of equation
     lemda_const = tf.constant([lemda],dtype=tf.float32)
     #XXX formatting the loss function
@@ -98,6 +98,9 @@ with tf.device('/gpu:0'):
     optimizer = tf.train.AdamOptimizer(0.001).minimize(loss)
     prediction = tf.nn.sigmoid(tf.matmul(val_kernel_holder,betas))#tf.sign(tf.matmul(kernel_holder,betas))
     val_prediction = tf.nn.sigmoid(tf.matmul(val_kernel_holder,betas))
+
+Ein = tf.reduce_mean(second_term)
+Eval = tf.reduce_mean(tf.log(tf.add(tf.constant([1],dtype=tf.float32),tf.exp(tf.mul(tf.constant([-1],dtype=tf.float32),tf.mul(tf.matmul(val_kernel_holder,betas),val_y))))))
 
 saver = tf.train.Saver()
 
@@ -116,8 +119,8 @@ with tf.Session() as session:
         _= session.run([optimizer], feed_dict={kernel_holder:kernel_variable,val_kernel_holder:val_kernel_variable})
         if step%1==0:
 
-	    _,p,vp= session.run([optimizer,prediction,val_prediction], feed_dict={kernel_holder:kernel_variable,val_kernel_holder:val_kernel_variable})
-	    txt = "Ein = "+str(100*float(np.sum(p!=train_y))/float(train_size)) + " Eout = "+str(float(100*np.sum(vp!=val_y))/float(val_size))
+	    _,p,vp= session.run([optimizer,Ein,Eval], feed_dict={kernel_holder:kernel_variable,val_kernel_holder:val_kernel_variable})
+	    #txt = "Ein = "+str(100*float(np.sum(p!=train_y))/float(train_size)) + " Eout = "+str(float(100*np.sum(vp!=val_y))/float(val_size))
 
-            print txt
+            print "Ein",p,"Eval",vp
     saver.save(session,"klr_model_processed.ckpt")
