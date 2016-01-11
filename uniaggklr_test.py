@@ -146,7 +146,7 @@ with tf.Session() as session:
 result = np.sign(np.sum(np.concatenate(result_array,axis=1),axis=1))
 print "result = \n",result
 result = (result+1)/2
-result_file = open('aggresult_processed.txt','w')
+result_file = open('aggresult.txt','w')
 for i in range(result.shape[0]):
     result_file.write(str(int(result[i,0]))+'\n')
 
