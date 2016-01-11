@@ -43,7 +43,7 @@ print "train_size = ",N," val size = ",M
 #target = 1+2*np.random.randint(-1,high=1,size = (N,1))
 
 
-with tf.device('/cpu:0'):
+with tf.device('/gpu:0'):
     #XXX setup the tf const for the training data
     y = tf.constant(train_y,dtype=tf.float32) #(dim,1)
     x = tf.constant(train_x,dtype=tf.float32) #(N,dim)
@@ -84,7 +84,7 @@ with tf.device('/cpu:0'):
     kernel_holder = tf.placeholder(tf.float32,shape=(N,N))
     val_kernel_holder = tf.placeholder(tf.float32,shape=(M,N))
 
-with tf.device('/cpu:0'):
+with tf.device('/gpu:0'):
     #the constants of equation
     lemda_const = tf.constant([lemda],dtype=tf.float32)
     #XXX formatting the loss function
@@ -95,12 +95,12 @@ with tf.device('/cpu:0'):
     #second_term = tf.reduce_sum(tf.square(tf.sub(y,second_term_tmp)),0)
     loss = tf.add(first_term,tf.reduce_sum(second_term,0))
     #loss = tf.add(first_term,second_term)
-    optimizer = tf.train.AdamOptimizer(0.001).minimize(loss)
-    prediction = tf.nn.sigmoid(tf.matmul(val_kernel_holder,betas))#tf.sign(tf.matmul(kernel_holder,betas))
-    val_prediction = tf.nn.sigmoid(tf.matmul(val_kernel_holder,betas))
-
+    optimizer = tf.train.AdamOptimizer(0.01).minimize(loss)
+    #prediction = tf.nn.sigmoid(tf.matmul(val_kernel_holder,betas))#tf.sign(tf.matmul(kernel_holder,betas))
+    #val_prediction = tf.nn.sigmoid(tf.matmul(val_kernel_holder,betas))
+    val_second_term = tf.log(tf.add(tf.constant([1],dtype=tf.float32),tf.exp(tf.mul(tf.constant([-1],dtype=tf.float32),tf.mul(tf.matmul(val_kernel_holder,betas),val_y)))))
 Ein = tf.reduce_mean(second_term)
-Eval = tf.reduce_mean(tf.log(tf.add(tf.constant([1],dtype=tf.float32),tf.exp(tf.mul(tf.constant([-1],dtype=tf.float32),tf.mul(tf.matmul(val_kernel_holder,betas),val_y))))))
+Eval = tf.reduce_mean(val_second_term)
 
 saver = tf.train.Saver()
 
