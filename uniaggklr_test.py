@@ -103,7 +103,7 @@ def tfKLRLoss(y,betas,kernel_holder,lemda):
     return loss
 
 def tfKLRPrediction(kernel_holder,betas):
-    prediction = tf.sigmoid(tf.matmul(kernel_holder,betas))
+    prediction = tf.sign(tf.matmul(kernel_holder,betas))
     return prediction
 
 with tf.device('/cpu:0'):
@@ -143,12 +143,12 @@ with tf.Session() as session:
         result_array.append(np.matrix(tp))
         print tp,type(tp)
 
-result = (np.sum(np.concatenate(result_array,axis=1),axis=1))/6
+result = np.sign(np.sum(np.concatenate(result_array,axis=1),axis=1))
 print "result = \n",result
-#result = (result+1)/2
+result = (result+1)/2
 result_file = open('aggresult_processed.txt','w')
 for i in range(result.shape[0]):
-    result_file.write(str(float(result[i,0]))+'\n')
+    result_file.write(str(int(result[i,0]))+'\n')
 
 result_file.close()
 
