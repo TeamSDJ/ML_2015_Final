@@ -45,7 +45,7 @@ print "train_size = ",N," val size = ",M
 
 with tf.device('/gpu:0'):
     #XXX setup the tf const for the training data
-    y = tf.constant(train_y,dtype=tf.float32) #(dim,1)
+    y = tf.constant(train_y,dtype=tf.float32) #(N,1)
     x = tf.constant(train_x,dtype=tf.float32) #(N,dim)
 
     y_v = tf.constant(val_y,dtype=tf.float32)

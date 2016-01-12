@@ -68,6 +68,7 @@ with tf.device('/cpu:0'):
     betas_array = []
     for i in range(6):
         betas_array.append(tf.Variable(tf.zeros([N, 1],dtype=tf.float32)))
+    weights = tf.Variable(tf.truncated_normal([6,1], stddev=0.1))
     x_train = tf.placeholder(tf.float32,shape=(train_size,dim))
     y_train = tf.placeholder(tf.float32,shape=(train_size,1))
     #XXX kernel placeholder
@@ -89,14 +90,25 @@ def tfKLRLoss(y,betas,kernel_holder,lemda):
     loss = tf.add(first_term,tf.reduce_sum(second_term,0))
     return loss
 
+def tfLRLoss(y,out):
+    #XXX formatting the loss function
+    second_term_tmp = tf.mul(out,y)
+    #second_term_tmp = tf.matmul(kernel_holder,betas)
+    second_term = tf.log(tf.add(tf.constant([1],dtype=tf.float32),tf.exp(tf.mul(tf.constant([-1],dtype=tf.float32),second_term_tmp))))
+    #second_term = tf.reduce_sum(tf.square(tf.sub(y,second_term_tmp)),0)
+    loss = tf.reduce_sum(second_term,0)
+    return loss
+
+def tfKLROut(kernel_holder,betas):
+    return tf.matmul(kernel_holder,betas)
+
 def tfKLRPrediction(kernel_holder,betas):
     prediction = tf.sign(tf.matmul(kernel_holder,betas))
     return prediction
 
-def tfError(y,betas,kernel_holder,lemda):
-    lemda_const = tf.constant([lemda],dtype=tf.float32)
+def tfError(y,out):
     #XXX formatting the loss function
-    second_term_tmp = tf.mul(tf.matmul(kernel_holder,betas),y)
+    second_term_tmp = tf.mul(out,y)
     #second_term_tmp = tf.matmul(kernel_holder,betas)
     second_term = tf.log(tf.add(tf.constant([1],dtype=tf.float32),tf.exp(tf.mul(tf.constant([-1],dtype=tf.float32),second_term_tmp))))
     #second_term = tf.reduce_sum(tf.square(tf.sub(y,second_term_tmp)),0)
@@ -120,45 +132,46 @@ with tf.device('/cpu:0'):
         kernel_array.append(tfGaussianKernel(x_array[i],x_train,gama))
         val_kernel_array.append(tfGaussianKernel(x_array[i],x_v,gama))
     #the constants of equation
-    loss_array = []
-    optimizer_array = []
-    prediction_array = []
-    val_prediction_array = []
-    error_array = []
-    val_error_array = []
+    out_array = []
     for i in range(6):
-        loss_array.append(tfKLRLoss(y_train,betas_array[i],kernel_array[i],lemda))
-    for i in range(6):
-        optimizer_array.append(tf.train.AdamOptimizer(learning_rate[i]).minimize(loss_array[i]))
+        out_array.append(tfKLROut(kernel_array[i],betas_array[i]))
+    out = tf.concat(1,out_array)
+    out._shape
+    out_final = tf.matmul(out,weights)
+    loss = tfLRLoss(y_train,out_final)
+    #second_term_tmp = tf.matmul(kernel_holder,betas)
+    optimizer = tf.train.AdamOptimizer(0.001).minimize(loss)
 
+    val_out_array = []
     for i in range(6):
-        error_array.append(tfError(y_train,betas_array[i],kernel_array[i],lemda))
-        val_error_array.append(tfError(val_y,betas_array[i],val_kernel_array[i],lemda))
-        prediction_array.append(tfKLRPrediction(kernel_array[i],betas_array[i]))
-        val_prediction_array.append(tfKLRPrediction(val_kernel_array[i],betas_array[i]))
+        val_out_array.append(tfKLROut(val_kernel_array[i],betas_array[i]))
+    val_out = tf.concat(1,val_out_array)
+    val_out_final = tf.matmul(val_out,weights)
+    prediction = tf.sign(out_final)
+    val_prediction = tf.sign(val_out_final)
+    Ein = tfError(y_train,out_final)
+    Eval = tfError(y_v,val_out_final)
 
-Ein_array = []
-Eval_array = []
-for i in range(6):
-    Ein_array.append(tf.reduce_mean(error_array[i]))
-    Eval_array.append(tf.reduce_mean(val_error_array[i]))
+Ein_ = tf.reduce_mean(Ein)
+Eval_ = tf.reduce_mean(Eval)
+
 saver = tf.train.Saver()
 
 
 num_steps = 600
 with tf.Session() as session:
     tf.initialize_all_variables().run()
-    for i in range(6):
-        print "part ",i
-        for step in range(num_steps):
-            x,y = data_part(step%6,train_size)
-            _= session.run([optimizer_array[i]],feed_dict={x_train:x,y_train:y})
-            if step%1==0:
-    	        p,vp,Ein,Eval= session.run([prediction_array[i],val_prediction_array[i],Ein_array[i],Eval_array[i]],feed_dict={x_train:x,y_train:y})
-    	        txt = " Ein0,1 = "+str(float(100*np.sum(np.matrix(p)!=data_part(step)[1]))/float(N))+" Eval0,1 = "+str(float(100*np.sum(np.matrix(vp)!=val_y))/float(M))
-                print txt
-                print "Einp=",Ein,"Evalp=",Eval
-        saver.save(session,"aggklr_model.ckpt")
+
+
+    for step in range(num_steps):
+        x,y = data_part(step%6,train_size)
+        _= session.run(optimizer,feed_dict={x_train:x,y_train:y})
+        if step%1==0:
+	        p,vp,Ein,Eval= session.run([prediction,val_prediction,Ein_,Eval_,feed_dict={x_train:x,y_train:y})
+	        txt = " Ein0,1 = "+str(float(100*np.sum(np.matrix(p)!=data_part(step%6,train_size)[1]))/float(N))+" Eval0,1 = "+str(float(100*np.sum(np.matrix(vp)!=val_y))/float(M))
+            print txt
+            print "Einp=",Ein,"Evalp=",Eval
+    saver.save(session,"aggklrnetwork_model.ckpt")
 
 
 # TODO do some shattering
