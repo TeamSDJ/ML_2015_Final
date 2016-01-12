@@ -67,7 +67,7 @@ with tf.device('/cpu:0'):
     #XXX setup all variables
     betas_array = []
     for i in range(6):
-        betas_array.append(tf.Variable(tf.zeros([N, 1],dtype=tf.float32)))
+        betas_array.append(tf.Variable(tf.zeros([train_size, 1],dtype=tf.float32)))
     x_train = tf.placeholder(tf.float32,shape=(train_size,dim))
     y_train = tf.placeholder(tf.float32,shape=(train_size,1))
     #XXX kernel placeholder
