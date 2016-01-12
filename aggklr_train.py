@@ -35,6 +35,8 @@ def data_part(part,N = train_size): # 0~5 training set # 6th part is the validat
     train_y = truth[part*N:part*N+N,:]
     return train_x,train_y
 
+
+
 val_x = data_part(6)[0]
 val_y = data_part(6)[1]
 
@@ -61,34 +63,19 @@ def tfGaussianKernel(xn,xm,gama):
     kernel = tf.exp(tf.mul(tf.constant([-gama],dtype=tf.float32),tf.add(tmp1,tmp2)))
     return kernel
 
-with tf.device('/gpu:0'):
-    #XXX setup the tf const for the training data
-    y_array = []
-    x_array = []
-    for i in range(6):
-        y_array.append(tf.constant(data_part(i)[1],dtype=tf.float32)) #(dim,1)
-        x_array.append(tf.constant(data_part(i)[0],dtype=tf.float32)) #(N,dim)
-
-    y_v = tf.constant(data_part(6)[1],dtype=tf.float32)
-    x_v = tf.constant(data_part(6)[0],dtype=tf.float32)
-    #XXX formatting the kernel of training data & validation data:
-    kernel_array = []
-    val_kernel_array = []
-    for i in range(6):
-        kernel_array.append(tfGaussianKernel(x_array[i],x_array[i],gama))
-        val_kernel_array.append(tfGaussianKernel(x_array[i],x_v,gama))
-
 with tf.device('/cpu:0'):
     #XXX setup all variables
     betas_array = []
     for i in range(6):
         betas_array.append(tf.Variable(tf.zeros([N, 1],dtype=tf.float32)))
+    x_train = tf.placeholder(tf.float32,shape=(train_size,dim))
+    y_train = tf.placeholder(tf.float32,shape=(train_size,1))
     #XXX kernel placeholder
-    kernel_holder_array = []
-    val_kernel_holder_array = []
-    for i in range(6):
-        kernel_holder_array.append(tf.placeholder(tf.float32,shape=(N,N)))
-        val_kernel_holder_array.append(tf.placeholder(tf.float32,shape=(M,N)))
+    #kernel_holder_array = []
+    #val_kernel_holder_array = []
+    #for i in range(6):
+    #    kernel_holder_array.append(tf.placeholder(tf.float32,shape=(N,N)))
+    #    val_kernel_holder_array.append(tf.placeholder(tf.float32,shape=(M,N)))
 
 
 def tfKLRLoss(y,betas,kernel_holder,lemda):
@@ -115,7 +102,23 @@ def tfError(y,betas,kernel_holder,lemda):
     #second_term = tf.reduce_sum(tf.square(tf.sub(y,second_term_tmp)),0)
     return second_term
 
-with tf.device('/gpu:0'):
+
+with tf.device('/cpu:0'):
+    #XXX setup the tf const for the training data
+    y_array = []
+    x_array = []
+    for i in range(6):
+        y_array.append(tf.constant(data_part(i)[1],dtype=tf.float32)) #(dim,1)
+        x_array.append(tf.constant(data_part(i)[0],dtype=tf.float32)) #(N,dim)
+
+    y_v = tf.constant(data_part(6)[1],dtype=tf.float32)
+    x_v = tf.constant(data_part(6)[0],dtype=tf.float32)
+    #XXX formatting the kernel of training data & validation data:
+    kernel_array = []
+    val_kernel_array = []
+    for i in range(6):
+        kernel_array.append(tfGaussianKernel(x_array[i],x_train,gama))
+        val_kernel_array.append(tfGaussianKernel(x_array[i],x_v,gama))
     #the constants of equation
     loss_array = []
     optimizer_array = []
@@ -124,15 +127,15 @@ with tf.device('/gpu:0'):
     error_array = []
     val_error_array = []
     for i in range(6):
-        loss_array.append(tfKLRLoss(y_array[i],betas_array[i],kernel_holder_array[i],lemda))
+        loss_array.append(tfKLRLoss(y_train,betas_array[i],kernel_array[i],lemda))
     for i in range(6):
         optimizer_array.append(tf.train.AdamOptimizer(learning_rate[i]).minimize(loss_array[i]))
 
     for i in range(6):
-        error_array.append(tfError(y_array[i],betas_array[i],kernel_holder_array[i],lemda))
-        val_error_array.append(tfError(val_y,betas_array[i],val_kernel_holder_array[i],lemda))
-        prediction_array.append(tfKLRPrediction(kernel_holder_array[i],betas_array[i]))
-        val_prediction_array.append(tfKLRPrediction(val_kernel_holder_array[i],betas_array[i]))
+        error_array.append(tfError(y_train,betas_array[i],kernel_array[i],lemda))
+        val_error_array.append(tfError(val_y,betas_array[i],val_kernel_array[i],lemda))
+        prediction_array.append(tfKLRPrediction(kernel_array[i],betas_array[i]))
+        val_prediction_array.append(tfKLRPrediction(val_kernel_array[i],betas_array[i]))
 
 Ein_array = []
 Eval_array = []
@@ -141,30 +144,18 @@ for i in range(6):
     Eval_array.append(tf.reduce_mean(val_error_array[i]))
 saver = tf.train.Saver()
 
-with tf.Session() as session:
-    kernel_variable_array = []
-    for i in range(6):
-        kernel_variable_array.append(kernel_array[i].eval())
-    #val_kernel_variable = val_kernel.eval()
 
-print "kernel operation complete!"
-
-with tf.Session() as session:
-    val_kernel_variable_array = []
-    for i in range(6):
-        val_kernel_variable_array.append(val_kernel_array[i].eval())
-
-print "validation kernel operation complete!"
-num_steps = 1000
+num_steps = 10
 with tf.Session() as session:
     tf.initialize_all_variables().run()
     for i in range(6):
         print "part ",i
         for step in range(num_steps):
-            _= session.run([optimizer_array[i]], feed_dict={kernel_holder_array[i]:kernel_variable_array[i],val_kernel_holder_array[i]:val_kernel_variable_array[i]})
-            if step%100==0:
-    	        p,vp,Ein,Eval= session.run([prediction_array[i],val_prediction_array[i],Ein_array[i],Eval_array[i]], feed_dict={kernel_holder_array[i]:kernel_variable_array[i],val_kernel_holder_array[i]:val_kernel_variable_array[i]})
-    	        txt = " Ein0,1 = "+str(float(100*np.sum(np.matrix(p)!=data_part(i)[1]))/float(N))+" Eval0,1 = "+str(float(100*np.sum(np.matrix(vp)!=val_y))/float(M))
+            x,y = data_part(step%6,train_size)
+            _= session.run([optimizer_array[i]],feed_dict={x_train:x,y_train:y})
+            if step%1==0:
+    	        p,vp,Ein,Eval= session.run([prediction_array[i],val_prediction_array[i],Ein_array[i],Eval_array[i]],feed_dict={x_train:x,y_train:y})
+    	        txt = " Ein0,1 = "+str(float(100*np.sum(np.matrix(p)!=data_part(step)[1]))/float(N))+" Eval0,1 = "+str(float(100*np.sum(np.matrix(vp)!=val_y))/float(M))
                 print txt
                 print "Einp=",Ein,"Evalp=",Eval
         saver.save(session,"aggklr_model.ckpt")
