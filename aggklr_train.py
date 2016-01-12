@@ -145,7 +145,7 @@ for i in range(6):
 saver = tf.train.Saver()
 
 
-num_steps = 10
+num_steps = 600
 with tf.Session() as session:
     tf.initialize_all_variables().run()
     for i in range(6):
